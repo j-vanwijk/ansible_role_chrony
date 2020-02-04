@@ -1,0 +1,67 @@
+---
+- name: Verify
+  hosts: all
+  become: True
+  gather_facts: False
+  tasks:
+    - name: Gather package facts
+      package_facts:
+        manager: auto
+
+    - name: Gather service facts
+      service_facts:
+
+    - name: Ensure ntpd is unarmed
+      fail:
+        msg: Service 'ntpd' is still running and/or enabled
+      when: (ansible_facts.services["ntpd.service"] is defined and ansible_facts.services["ntpd.service"].state == "running") or
+            (ansible_facts.services["ntpd.service"] is defined and ansible_facts.services["ntpd.service"].status == "enabled")
+
+    - name: Ensure chrony is installed
+      fail:
+        msg: Package 'chrony' is not installed
+      when: "'chrony' not in ansible_facts.packages"
+
+    - name: Ensure chrony service is enabled and running
+      fail:
+        msg: Service 'chronyd' is not running and/or enabled
+      when:
+        - ansible_facts.services["chronyd.service"].state != "running"
+        - ansible_facts.services["chronyd.service"].status != "enabled"
+
+    - name: Ensure chrony configuration file exists
+      file:
+        path: /etc/chrony.conf
+        owner: root
+        group: root
+        mode: '0644'
+      check_mode: True
+
+    - name: Run command | [ chronyc tracking ] | part 1
+      command: chronyc tracking
+      register: role_chrony_verify_command
+      changed_when: False
+
+    - name: Show output | [ chronyc tracking ] | part 2
+      debug:
+        msg: "{{ role_chrony_verify_command.stdout.split('\n') }}"
+
+    - name: Run command | [ chronyc sources ] | part 1
+      command: chronyc sources
+      register: role_chrony_verify_command
+      changed_when: False
+
+    - name: Show output | [ chronyc sources ] | part 2
+      debug:
+        msg: "{{ role_chrony_verify_command.stdout.split('\n') }}"
+
+    - name: Run command | [ chronyc sourcestats ] | part 1
+      command: chronyc sourcestats
+      register: role_chrony_verify_command
+      changed_when: False
+
+    - name: Show output | [ chronyc sourcestats ] | part 2
+      debug:
+        msg: "{{ role_chrony_verify_command.stdout.split('\n') }}"
+
+...

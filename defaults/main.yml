@@ -1,0 +1,38 @@
+---
+### Setting up the /etc/chrony.conf file.
+## These variables together build up the configuration file.
+## It is primarily tied to the templates/chrony.conf.j2 template file.
+##
+## Some parameters may contain free text values. No specific parsing of values
+## takes place due to the fact that if it would increase the complexity of the
+## Ansible role as will it's maintainability. It is strongly advised to consult
+## the official and latest documentation in order to prevent unintended
+## misconfiguration. Make sure to test your setup and verify a correct working
+## set. The given defaults are part of a minimal, stable and recommended set
+## of configuration parameters.
+##
+## Man pages:
+## Enterprise Linux, Fedora: man chrony.conf
+##
+## The list of these variables require a naming convention to enable a pattern.
+## The pattern is rendered as a list to iterate over once the configuration
+## template gets deployed on the desired target destination.
+
+role_chrony_chrony_dot_conf_parameters_server:
+  - server 0.rhel.pool.ntp.org iburst minpoll 4 maxpoll 6 polltarget 16
+  - server 1.rhel.pool.ntp.org iburst minpoll 4 maxpoll 6 polltarget 16
+  - server 2.rhel.pool.ntp.org iburst minpoll 4 maxpoll 6 polltarget 16
+  - server 3.rhel.pool.ntp.org iburst minpoll 4 maxpoll 6 polltarget 16
+role_chrony_chrony_dot_conf_parameters_makestep: makestep 1.0 3
+role_chrony_chrony_dot_conf_parameters_rtcsync: rtcsync
+role_chrony_chrony_dot_conf_parameters_hwtimestamp: hwtimestamp *
+role_chrony_chrony_dot_conf_parameters_minsources: minsources 2
+role_chrony_chrony_dot_conf_parameters_drift_file: driftfile /var/lib/chrony/drift
+role_chrony_chrony_dot_conf_parameters_keyfile: keyfile /etc/chrony.keys
+role_chrony_chrony_dot_conf_parameters_logdir: logdir /var/log/chrony
+
+### Define the required timezone.
+## Run the command 'timedatectl list-timezones' to see all available timezones.
+role_chrony_time_zone: Europe/Amsterdam
+
+...

@@ -1,0 +1,51 @@
+---
+- name: Unarm ntp | part 1 | Gather package facts
+  package_facts:
+    manager: auto
+
+- name: Unarm ntp | part 2 | Ensure ntpd is stopped and disabled
+  systemd:
+    name: ntpd
+    state: stopped
+    enabled: False
+    daemon_reload: True
+  when: "'ntp' in ansible_facts.packages"
+
+- name: Unarm ntp | part 3 | Ensure ntpd is masked
+  systemd:
+    name: ntpd
+    masked: True
+  when: "'ntp' in ansible_facts.packages"
+
+- name: Ensure timezone is set to {{ role_chrony_time_zone }}
+  timezone:
+    name: '{{ role_chrony_time_zone }}'
+
+- name: Ensure chrony is installed
+  package:
+    name: '{{ role_chrony_required_packages }}'
+    state: present
+  notify: start_restart_chronyd
+
+- name: Deploy chrony configuration file
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: start_restart_chronyd
+
+- name: Arm chrony | part 1 | Gather service facts
+  service_facts:
+
+- name: Arm chrony | part 2 | Ensure chrony service is enabled and running
+  debug:
+    msg: Try to start and enable 'chronyd' service if required
+  when:
+    - ansible_facts.services["chronyd.service"].state != "running"
+    - ansible_facts.services["chronyd.service"].status != "enabled"
+  changed_when: True
+  notify: start_restart_chronyd
+
+...

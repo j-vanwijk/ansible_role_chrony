@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+{% set chrony_conf_vars = vars.keys() | select('match', '^role_chrony_chrony_dot_conf_parameters_.*$') %}
+{% for key in chrony_conf_vars %}
+{% if vars[key] is iterable and vars[key] is not string  %}
+{% for item in vars[key] %}
+{{ item }}
+{% endfor %}
+{% else %}
+{{ vars[key] }}
+{% endif %}
+{% endfor %}
