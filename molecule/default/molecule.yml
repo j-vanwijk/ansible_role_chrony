@@ -22,7 +22,7 @@ driver:
   name: docker
 platforms:
   - name: "${role_name:-ansible_role_chrony}-${image:-ansible-molecule-centos}-${tag:-7}"
-    image: "${namespace:-caseraw}/${image:-ansible-molecule-centos}:${tag:-7}"
+    image: "${namespace:-j-vanwijk}/${image:-ansible-molecule-centos}:${tag:-7}"
     command: "${cmd:-/usr/sbin/init}"
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
